@@ -5,6 +5,8 @@
 // maybe add another viet rec 
 // const voiceReconViet = new p5.SpeechRec(`Linh`);
 
+// Max alternative ? (least confident results) - https://editor.p5js.org/pippinbarr/sketches/dyoCU6PJU
+
 const voiceRecon = new p5.SpeechRec();
 const voiceSynth = new p5.Speech();
 let feeling = 8;
@@ -57,7 +59,7 @@ function draw() {
     text(voiceText, width/2, height/2);
 }
 
-function gotVoiceResult() {
+function gotVoiceResult() { // https://editor.p5js.org/pippinbarr/sketches/dyoCU6PJU
     if (voiceRecon.resultConfidence > 0 && understood === true) {
         feeling -= 1;
         feeling = constrain(feeling,0, voiceSay.length);
