@@ -14,8 +14,6 @@ let textBox, submitTextButton; // variables that holds the HTML textbox & button
 let responseAnswerArray;
 let responseAnswer = "";
 
-// let currentVoice = "user"; // Initialize the current voice as "user"
-
 let letterToNumber = { // ChatGpt4 for reordering/associating the alphabetical object
     "a": "01",
     "b": "02",
@@ -50,7 +48,6 @@ function preload() {
 }
 
 function setup() {
-    // voiceOutput.setVoice(`Google UK English Female`); // why my voice doesn't change? 
     createCanvas(windowWidth,windowHeight);
 
     // text Box to input text
@@ -76,23 +73,7 @@ function setup() {
     // Result: This is a sample string, with numbers and symbols.
 }
 
-// Create new function for user questions input?
-
-
-
 function getResponseAnswer() {
-
-    // keep this in case
-    // if (currentVoice === "user") {
-    //     voiceOutput.setVoice(`Google UK English Male`);
-    //     currentVoice = "computer";
-    // } 
-    //     else {
-    //     voiceOutput.setVoice(`Google UK English Female`);
-    //     currentVoice = "user";
-    //     }
-    // console.log("Current voice after switch:", currentVoice);
-  
 
     voiceOutput.setVoice(`Google UK English Male`);
     responseAnswer = random(responseAnswerArray); // get new answer
@@ -103,29 +84,20 @@ function getResponseAnswer() {
 
 function draw() {
     background(30);
-    
-    let textBoxContent = textBox.value(); // identify the word in the textbox
-    textBoxContent = textBoxContent.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' '); // GPT4 - Regular expression (removing numb & symbols)
-    words = textBoxContent.split(" "); // split the sentence in the textbox at each space, and get back a list of words
 
-    let unfinishedWord = words.pop(); // remove the last word of the array and put it in the unfinished word
-    text(unfinishedWord, width/2, height/2); // display the last word written by the user
-    
-    // word.length only changes when the user is done writing a word & adds a space // move this in a function
-    if (amtWords != words.length) { // only run once
-        amtWords = words.length; 
-        if (words[amtWords - 1]) { // the voice output happening when we start writing the first word
-            voiceOutput.setVoice(`Google UK English Female`); // why my voice doesn't change? 
-            voiceOutput.speak(words[amtWords - 1]); // voice output of the user writing the last word
-        }
-    }
-    
+    userQuestion();
     wordMap(words, true); // words on map (see function below)
 
     if (responseAnswer.length > 0) {
         let responseWords = responseAnswer.split(" ");
         wordMap(responseWords,false);
     }
+    
+    titleInstruction();
+}
+
+function titleInstruction() {
+    // move this in a function 
     textSize(30);
     fill(255);
     // text(textBox.value(), width/2, height/3);
@@ -135,6 +107,27 @@ function draw() {
     textSize(15);
     text(`Ask me any questions and I will try to map an answer.`, width/2, height - 200);
     textSize(10);
+}
+
+function userQuestion() {
+
+    // question entered by user & cleaned out
+    let textBoxContent = textBox.value(); // identify the word in the textbox
+    textBoxContent = textBoxContent.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' '); // GPT4 - Regular expression (removing numb & symbols)
+    words = textBoxContent.split(" "); // split the sentence in the textbox at each space, and get back a list of words
+
+    // questions display
+    let unfinishedWord = words.pop(); // remove the last word of the array and put it in the unfinished word
+    text(unfinishedWord, width/2, height/2); // display the last word written by the user
+    
+    // word.length only changes when the user is done writing a word & adds a space 
+    if (amtWords != words.length) { // only run once
+        amtWords = words.length; 
+        if (words[amtWords - 1]) { // the voice output happening when we start writing the first word
+            voiceOutput.setVoice(`Google UK English Female`); // why my voice doesn't change? 
+            voiceOutput.speak(words[amtWords - 1]); // voice output of the user writing the last word
+        }
+    }
 }
 
 function wordMap(currentPhrase, isUser) { // visual of the maps 
@@ -159,7 +152,6 @@ function wordMap(currentPhrase, isUser) { // visual of the maps
         endShape(); // Drawing the line is ended, all the points are defined and the line are connecting it 
     pop();
 }
-
 
 function wordToVec(word) {
 

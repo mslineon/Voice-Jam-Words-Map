@@ -38,3 +38,16 @@ The user input their questions, the machine spit out random answer from the essa
 This is a wink to the idea that similarly to the semantic that the map is not the territory, the speech output here doesn't necessarly provide an answer even tho it will respond. 
 
 For the words the user will input, it will create a map, like a map of the world, but representating the map the the words. 
+
+
+// Notes: Rejection of meaning (how to go fully in that sense?)
+
+Rita (rednoise)- RiMarkov
+
+push into the feeling of how the user would feel 
+proclamation (machine sharing a feeling?)
+connection from the user text, and the machine text (how can we implement the relation in-between the user/Machine) 
+
+
+
+
