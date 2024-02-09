@@ -39,14 +39,26 @@ This is a wink to the idea that similarly to the semantic that the map is not th
 
 For the words the user will input, it will create a map, like a map of the world, but representating the map the the words. 
 
+Intention is to show that the response can be non-sensitivical
+
 
 // Notes: Rejection of meaning (how to go fully in that sense?)
 
-Rita (rednoise)- RiMarkov
+Rita (Rednoise)- RiMarkov
 
 push into the feeling of how the user would feel 
 proclamation (machine sharing a feeling?)
 connection from the user text, and the machine text (how can we implement the relation in-between the user/Machine) 
+
+What can I do to convey the feeling to the user?
+
+Test out question by the machine? 
+
+Don't forget the Map?
+
+1- The machine is saying something at the beginning (My response will not be an answer, but I will reply to you)
+
+2- 
 
 
 

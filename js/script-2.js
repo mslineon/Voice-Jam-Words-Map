@@ -11,8 +11,9 @@ let amtWords; // number of words - only set after finished typing
 
 let textBox, submitTextButton; // variables that holds the HTML textbox & button
 
-let responseAnswerArray;
-let responseAnswer = "";
+let dataForRita;// array of the lines in the text file
+let ritaModel; // object generating text from the rita
+let responseFromRita = ""; // string to hold rita
 
 let letterToNumber = { // ChatGpt4 for reordering/associating the alphabetical object
     "a": "01",
@@ -44,11 +45,14 @@ let letterToNumber = { // ChatGpt4 for reordering/associating the alphabetical o
   };
 
 function preload() {
-    responseAnswerArray = loadStrings("assets/data/text.txt"); // P5js ref to load the text files.
+    dataForRita = loadStrings("assets/data/text.txt"); // P5js ref to load the text files.
 }
 
 function setup() {
     createCanvas(windowWidth,windowHeight);
+
+    ritaModel = RiTa.markov(4); // ref from rita
+    ritaModel.addText(dataForRita.join(' ')); // ref from rita
 
     // text Box to input text
     const textBoxWidth = 400; 
@@ -64,9 +68,10 @@ function setup() {
     submitTextButton.mousePressed(getResponseAnswer);
 
     textAlign(CENTER, CENTER);
+
     // console.log(voiceOutput.listVoices()); 
 
-    // Ref ChatGPT4
+    // Reference ChatGPT4
     // let originalString = "This is a sample string, with numbers 123 and symbols !@#.";
     // let cleanedString = originalString.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
     // console.log(cleanedString);
@@ -74,26 +79,26 @@ function setup() {
 }
 
 function getResponseAnswer() {
-
     voiceOutput.setVoice(`Google UK English Male`);
-    responseAnswer = random(responseAnswerArray); // get new answer
-    voiceOutput.speak(responseAnswer);
-
-    responseAnswer = responseAnswer.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' '); // GPT4 - Regular expression (removing numb & symbols)
+    responseFromRita = ritaModel.generate();
+    voiceOutput.speak(responseFromRita);
+    responseFromRita = responseFromRita.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' '); // GPT4 - Regular expression (removing numb & symbols)  
 }
 
 function draw() {
-    background(30);
-
+    background(30); 
     userQuestion();
     wordMap(words, true); // words on map (see function below)
+    ritaAnswerVis();
+    titleInstruction();
 
-    if (responseAnswer.length > 0) {
-        let responseWords = responseAnswer.split(" ");
+}
+
+function ritaAnswerVis() {
+    if (responseFromRita.length > 0) {
+        let responseWords = responseFromRita.split(" ");
         wordMap(responseWords,false);
     }
-    
-    titleInstruction();
 }
 
 function titleInstruction() {
@@ -132,7 +137,6 @@ function userQuestion() {
 
 function wordMap(currentPhrase, isUser) { // visual of the maps 
     textSize(10);
-
     push();
         translate(width/2, height/2);
         beginShape(); // drawing the line starts here
@@ -158,7 +162,6 @@ function wordToVec(word) {
     let vectorString = ["0.", "0."]; // array of strings [0,1]
 
     for (let letterIdx = 0; letterIdx < word.length; letterIdx++) { // indicating each letters in the word 
-
         let letter = word[letterIdx].toLowerCase(); // get the letter at the Idx above
         let letterNumber = letterToNumber[letter]; // lookup letter in the object to link letter to a number
         
