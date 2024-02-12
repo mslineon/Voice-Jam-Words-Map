@@ -6,14 +6,23 @@
 const voiceOutput = new p5.Speech(); // variables to output speech (class)
 let voiceText = ""; // empty strings
 
+let fadeOut = 0;
 let words; // array(list) of strings(words) held here
 let amtWords; // number of words - only set after finished typing
 
 let textBox, submitTextButton; // variables that holds the HTML textbox & button
 
+let titleFont; // font title
+// let myFont; // font description
+
 let dataForRita;// array of the lines in the text file
 let ritaModel; // object generating text from the rita
 let responseFromRita = ""; // string to hold rita
+
+voiceOutput.onEnd = ritaSayNextWord;
+voiceOutput.interrupt = true;
+let ritaWillSay = [];
+let ritaSaid = [];
 
 let letterToNumber = { // ChatGpt4 for reordering/associating the alphabetical object
     "a": "01",
@@ -42,10 +51,30 @@ let letterToNumber = { // ChatGpt4 for reordering/associating the alphabetical o
     "x": "24",
     "y": "25",
     "z": "26"
-  };
+};
+
+let ritaQuestionsAfter = [ // question after the response from Rita to sound like a conversation
+    "",
+    "Do you think so?",
+    "That is my opinion, what is yours?",
+    "But you know, whatever. Right?",
+    "Which is not at all what you were saying"
+];
+
+let ritaQuestionsBefore = [ // statement to make the response from Rita more human
+    "",
+    "Well, I think, ",
+    "I am not sure, but, ",
+    "Well, actually, ",
+    "You are right, that's why i always say, ",
+    "Irrelevant! Now listen, ",
+    "Sure, but let me tell you this, "
+];
 
 function preload() {
     dataForRita = loadStrings("assets/data/text.txt"); // P5js ref to load the text files.
+    titleFont = loadFont("assets/fonts/dahlia-regularcondensed.otf"); // loading title font
+    // myFont = loadFont("assets/fonts/WorkSans-Light.ttf"); // loading text font
 }
 
 function setup() {
@@ -69,7 +98,7 @@ function setup() {
 
     textAlign(CENTER, CENTER);
 
-    // console.log(voiceOutput.listVoices()); 
+    console.log(voiceOutput.listVoices()); 
 
     // Reference ChatGPT4
     // let originalString = "This is a sample string, with numbers 123 and symbols !@#.";
@@ -79,39 +108,57 @@ function setup() {
 }
 
 function getResponseAnswer() {
+    
     voiceOutput.setVoice(`Google UK English Male`);
     responseFromRita = ritaModel.generate();
-    voiceOutput.speak(responseFromRita);
+    // voiceOutput.speak(responseFromRita + "What do you think of that?");
+    responseFromRita = random(ritaQuestionsBefore) + responseFromRita + random(ritaQuestionsAfter);
     responseFromRita = responseFromRita.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' '); // GPT4 - Regular expression (removing numb & symbols)  
+    // voiceOutput.speak(responseFromRita + "?");
+    // responseFromRita = random(ritaQuestionsBefore) + responseFromRita + random(ritaQuestionsAfter);
+    ritaWillSay = responseFromRita.split(" ");
+    ritaSaid = [];
+    ritaSayNextWord();
 }
 
 function draw() {
-    background(30); 
+    background(240,248,255); 
     userQuestion();
     wordMap(words, true); // words on map (see function below)
     ritaAnswerVis();
     titleInstruction();
-
 }
 
-function ritaAnswerVis() {
+function ritaSayNextWord() { // word appear similarly to the conversation - one at the time
+    if (ritaWillSay.length > 0) {
+        let nextword = ritaWillSay[0];
+        voiceOutput.speak(nextword);
+        ritaSaid.push(ritaWillSay.shift());
+        fadeOut ++; 
+    }
+}
+
+function ritaAnswerVis() { // answers from Rita
     if (responseFromRita.length > 0) {
-        let responseWords = responseFromRita.split(" ");
-        wordMap(responseWords,false);
+        // textSize(20);
+        text(ritaSaid[ritaSaid.length - 1], width/2, height/2 - 50);
+        wordMap(ritaSaid,false);
     }
 }
 
 function titleInstruction() {
     // move this in a function 
-    textSize(30);
-    fill(255);
+    textSize(45);
+    fill(56,56,56,255 - constrain(fadeOut * 10, 0, 255));
     // text(textBox.value(), width/2, height/3);
-    text(`The map is not the territory\nThe response is not the answer`, width/2, height/3);
-    textSize(20);
+    textFont(titleFont);
+    text(`The map is not the territory\nThe response is not the answer`, width/2, height/4);
+    fill(56,56,56);
+    textSize(25);
     text(`The Map of The Words`, width/2, 50);
-    textSize(15);
-    text(`Ask me any questions and I will try to map an answer.`, width/2, height - 200);
-    textSize(10);
+    textSize(25);
+    text(`Let's discuss.`, width/2, height - 200);
+    textSize(25);
 }
 
 function userQuestion() {
@@ -127,7 +174,9 @@ function userQuestion() {
     
     // word.length only changes when the user is done writing a word & adds a space 
     if (amtWords != words.length) { // only run once
-        amtWords = words.length; 
+        amtWords = words.length;
+        ritaWillSay = [];
+        fadeOut ++;  
         if (words[amtWords - 1]) { // the voice output happening when we start writing the first word
             voiceOutput.setVoice(`Google UK English Female`); // why my voice doesn't change? 
             voiceOutput.speak(words[amtWords - 1]); // voice output of the user writing the last word
@@ -136,23 +185,23 @@ function userQuestion() {
 }
 
 function wordMap(currentPhrase, isUser) { // visual of the maps 
-    textSize(10);
+    textSize(15);
     push();
         translate(width/2, height/2);
         beginShape(); // drawing the line starts here
         for (let i = 0; i < currentPhrase.length; i++) {
             let vectorResult = wordToVec(currentPhrase[i]); // the magic happens here - turn word into vector (matrices & vectors course got handy here)
             if (isUser) {
-                fill(255,0,0);
+                fill(255,140,140);
             }
             else {
-                fill(0,0, 255);
+                fill(54,124,43);
             }
             vertex(vectorResult[0] * width/3, vectorResult[1] * height/3); // points connected by the line
             text(currentPhrase[i], vectorResult[0] * (width/3), vectorResult[1] * (height/3)); // integrating user sentence and position it a the point where we calculated the vectors
         }
         noFill();
-        stroke(255, 50);
+        stroke(0, 100);
         endShape(); // Drawing the line is ended, all the points are defined and the line are connecting it 
     pop();
 }
@@ -183,5 +232,3 @@ function wordToVec(word) {
     ]
     return vector; // pooping it out
 }
-
-
